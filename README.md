@@ -1,3 +1,3 @@
 # Truss Optimization Code
 
-This is a python program that make two-dimensional truss optimization using ESO method.
+This is a python program that performs two-dimensional truss optimization using ESO method.
