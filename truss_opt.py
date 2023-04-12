@@ -199,3 +199,52 @@ def protect_els(els, loads, BC, mask_del):
                 mask_els[protect] = True
 
     return mask_els
+
+def del_node(nodes, els):
+    """
+    Retricts nodes dof that aren't been used.
+    
+    Get from: https://github.com/AppliedMechanics-EAFIT/SolidsPy/blob/master/solidspy/solids_GUI.py
+    
+    Parameters
+    ----------
+    nodes : ndarray
+        Array with models nodes
+    els : ndarray
+        Array with models elements
+
+    Returns
+    -------
+    """   
+    n_nodes = nodes.shape[0]
+    for n in range(n_nodes):
+        if n not in els[:, -4:]:
+            nodes[n, -2:] = -1
+
+
+def plot_truss1(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
+    """
+    Plot a truss and encodes the stresses in a colormap
+    """
+    mask = (mats[:,1]==1e-8)
+    if mask.sum() > 0:
+        stresses[mask] = 0
+
+    max_stress = max(-stresses.min(), stresses.max())
+    scaled_stress = 0.5*(stresses + max_stress)/max_stress
+    min_area = mats[:, 1].min()
+    max_area = mats[:, 1].max()
+    areas = mats[:, 1].copy()
+    max_val = 4
+    min_val = 0.5
+    if max_area - min_area > 1e-6:
+        widths = (max_val - min_val)*(areas - min_area)/(max_area - min_area)\
+            + min_val
+    else:
+        widths = 3*np.ones_like(areas)
+    for el in elements:
+        ini, end = el[3:]
+        plt.plot([nodes[ini, 1], nodes[end, 1]],
+                    [nodes[ini, 2], nodes[end, 2]],
+                    color=(1.0, 0.0, 0.0, 1.0), lw=widths[el[2]])
+    plt.axis("image")
