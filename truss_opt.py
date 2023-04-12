@@ -136,33 +136,30 @@ def grid_truss(length, height, nx, ny):
     return nodes, elements, nels, x, y
 
 
-def plot_truss(nodes, elements, mats, loads, tol=1e-5):
+def plot_truss(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
     """
     Plot a truss and encodes the stresses in a colormap
     """
-    _, stresses = fem_sol(nodes, elements, mats, loads)
-    max_stress = max(-stresses.min(), stresses.max())
-    scaled_stress = 0.5*(stresses - max_stress)/max_stress
+    mask = (mats[:,1]==1e-8)
+    if mask.sum() > 0:
+        stresses[mask] = 0
 
-    scaled_stress_= stresses/max_stress
+    max_stress = max(-stresses.min(), stresses.max())
+    scaled_stress = 0.5*(stresses + max_stress)/max_stress
     min_area = mats[:, 1].min()
     max_area = mats[:, 1].max()
     areas = mats[:, 1].copy()
     max_val = 4
     min_val = 0.5
     if max_area - min_area > 1e-6:
-        widths = (max_val - min_val)*(areas - min_area)/(max_area - min_area) + min_val
+        widths = (max_val - min_val)*(areas - min_area)/(max_area - min_area)\
+            + min_val
     else:
         widths = 3*np.ones_like(areas)
     for el in elements:
-        if areas[el[2]] > tol:
+        if areas[el[2]] > tol and mask_del[el[0]]:
             ini, end = el[3:]
-            scaled = -scaled_stress[el[0]]
-            if scaled_stress_[el[0]] < 0:
-                color = (scaled, 0.0, 0.0, 1.0)
-            else:
-                color = (0.0, 0.0, scaled, 1.0)
-
+            color = plt.cm.seismic(scaled_stress[el[0]])
             plt.plot([nodes[ini, 1], nodes[end, 1]],
                      [nodes[ini, 2], nodes[end, 2]],
                      color=color, lw=widths[el[2]])

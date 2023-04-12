@@ -25,16 +25,16 @@ BC = nodes[(nodes[:,-2] == -1) & (nodes[:,-1] == -1), 0]
 mats = np.ones((nels, 2))
 areas = np.ones(nels)
 mats[:, 1] = areas
-matsI = mats.copy()
+mats1 = mats.copy()
 #%% Optimization
-niter = 20
+niter = 50
 RR = 0.01
 ER = 0.001
 V_opt = int(nels * 0.50)
 ELS = None
 
 mats2 = mats.copy()
-for i in range(40):
+for i in range(niter):
     if not is_equilibrium(nodes, elements, mats, loads) or (mats2[:,1]>1e-8).sum() < V_opt: 
         print('Not equilibrium')
         break
@@ -49,11 +49,14 @@ for i in range(40):
     RR += ER
 print(RR)
 #%% Plotting
+_, stresses1 = fem_sol(nodes, elements, mats1, loads)
+_, stresses2 = fem_sol(nodes, elements, mats2, loads)
+
 plt.figure(figsize=(12, 4))
 plt.subplot(121)
 plt.title('Original truss')
-plot_truss(nodes, elements, matsI, loads)
+plot_truss(nodes, elements, mats1, stresses1, mask_del)
 plt.subplot(122)
 plt.title('Optimize truss')
-plot_truss(nodes, elements, mats2, loads)
+plot_truss(nodes, elements, mats2, stresses2, mask_del)
 plt.show()
