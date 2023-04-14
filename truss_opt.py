@@ -87,7 +87,6 @@ def volume(nodes, elements, mats):
     ini = elements[:, 3]
     end = elements[:, 4]
     lengths = np.linalg.norm(nodes[end, 1:3] - nodes[ini, 1:3], axis=1)
-
     return np.sum(areas * lengths)
 
 
@@ -157,12 +156,38 @@ def plot_truss(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
     else:
         widths = 3*np.ones_like(areas)
     for el in elements:
-        if areas[el[2]] > tol and mask_del[el[0]]:
+        if areas[el[2]] > tol:
             ini, end = el[3:]
             color = plt.cm.seismic(scaled_stress[el[0]])
             plt.plot([nodes[ini, 1], nodes[end, 1]],
                      [nodes[ini, 2], nodes[end, 2]],
-                     color=color, lw=widths[el[2]])
+                     color=(1.0, 0.0, 0.0, 1.0), lw=widths[el[2]])
+    plt.axis("image")
+
+def plot_truss_del(nodes, elements, mats, stresses):
+    """
+    nodes: ndarray
+        Array with models nodes
+    nodes: ndarray
+        Array with models nodes
+    """
+    max_stress = max(-stresses.min(), stresses.max())
+    scaled_stress = 0.5*(stresses + max_stress)/max_stress
+    min_area = mats[:, 1].min()
+    max_area = mats[:, 1].max()
+    areas = mats[:, 1].copy()
+    max_val = 4
+    min_val = 0.5
+    if max_area - min_area > 1e-6:
+        widths = (max_val - min_val)*(areas - min_area)/(max_area - min_area)\
+            + min_val
+    else:
+        widths = 3*np.ones_like(areas)
+    for el in elements:
+        ini, end = el[3:]
+        plt.plot([nodes[ini, 1], nodes[end, 1]],
+                    [nodes[ini, 2], nodes[end, 2]],
+                    color=(1.0, 0.0, 0.0, 1.0), lw=widths[el[2]])
     plt.axis("image")
 
 def protect_els(els, loads, BC, mask_del):
@@ -199,36 +224,6 @@ def protect_els(els, loads, BC, mask_del):
                 mask_els[protect] = True
 
     return mask_els
-
-def plot_truss_del(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
-    """
-    nodes: ndarray
-        Array with models nodes
-    nodes: ndarray
-        Array with models nodes
-    """
-    mask = (mats[:,1]==1e-8)
-    if mask.sum() > 0:
-        stresses[mask] = 0
-
-    max_stress = max(-stresses.min(), stresses.max())
-    scaled_stress = 0.5*(stresses + max_stress)/max_stress
-    min_area = mats[:, 1].min()
-    max_area = mats[:, 1].max()
-    areas = mats[:, 1].copy()
-    max_val = 4
-    min_val = 0.5
-    if max_area - min_area > 1e-6:
-        widths = (max_val - min_val)*(areas - min_area)/(max_area - min_area)\
-            + min_val
-    else:
-        widths = 3*np.ones_like(areas)
-    for el in elements:
-        ini, end = el[3:]
-        plt.plot([nodes[ini, 1], nodes[end, 1]],
-                    [nodes[ini, 2], nodes[end, 2]],
-                    color=(1.0, 0.0, 0.0, 1.0), lw=widths[el[2]])
-    plt.axis("image")
 
 def del_node(nodes, els):
     """

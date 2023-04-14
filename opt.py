@@ -31,7 +31,7 @@ niter = 50
 RR = 0.01
 ER = 0.001
 V_init = volume(nodes, elements, mats)
-V_opt = V_init * 0.40
+V_opt = V_init * 0.30
 ELS = None
 
 mats2 = mats.copy()
@@ -53,16 +53,13 @@ for i in range(niter):
     RR += ER
 print(RR)
 #%% Plotting
-print(v)
-print(len(mats2[(mats2[:,1] < 1e-7), :]))
-#%% Plotting
 _, stresses1 = fem_sol(nodes, elements, mats1, loads)
 _, stresses2 = fem_sol(nodes, elements, mats2, loads)
 
 plt.figure(figsize=(12, 4))
 plt.subplot(121)
 plt.title('Original truss')
-plot_truss(nodes, elements, mats1, stresses1, mask_del)
+plot_truss(nodes, elements, mats1, stresses1)
 plt.subplot(122)
 plt.title('Optimize truss')
 plot_truss(nodes, elements, mats2, stresses2, mask_del)
