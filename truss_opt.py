@@ -135,7 +135,7 @@ def grid_truss(length, height, nx, ny):
     return nodes, elements, nels, x, y
 
 
-def plot_truss(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
+def plot_truss(nodes, elements, mats, stresses, tol=1e-5):
     """
     Plot a truss and encodes the stresses in a colormap
     """
@@ -161,7 +161,7 @@ def plot_truss(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
             color = plt.cm.seismic(scaled_stress[el[0]])
             plt.plot([nodes[ini, 1], nodes[end, 1]],
                      [nodes[ini, 2], nodes[end, 2]],
-                     color=(1.0, 0.0, 0.0, 1.0), lw=widths[el[2]])
+                     color=color, lw=widths[el[2]])
     plt.axis("image")
 
 def plot_truss_del(nodes, elements, mats, stresses):

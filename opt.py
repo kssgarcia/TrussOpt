@@ -31,7 +31,7 @@ niter = 50
 RR = 0.01
 ER = 0.001
 V_init = volume(nodes, elements, mats)
-V_opt = V_init * 0.30
+V_opt = V_init * 0.70
 ELS = None
 
 mats2 = mats.copy()
@@ -62,5 +62,5 @@ plt.title('Original truss')
 plot_truss(nodes, elements, mats1, stresses1)
 plt.subplot(122)
 plt.title('Optimize truss')
-plot_truss(nodes, elements, mats2, stresses2, mask_del)
+plot_truss(nodes, elements, mats2, stresses2)
 plt.show()
