@@ -53,8 +53,6 @@ for i in range(niter):
     RR += ER
 print(RR)
 #%% Plotting
-print(V_init)
-print(V_opt)
 print(v)
 print(len(mats2[(mats2[:,1] < 1e-7), :]))
 #%% Plotting
