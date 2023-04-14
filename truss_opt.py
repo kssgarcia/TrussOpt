@@ -70,44 +70,44 @@ def fem_sol(nodes, elements, mats, loads):
     stress_nodes = pos.stress_truss(nodes, elements, mats, disp_comp)
     return disp_comp, stress_nodes
 
-
-def weight(areas, nodes, elements):
-    """Compute the weigth of the truss"""
+def volume(nodes, elements, mats):
+    """
+    Compute the volume of the truss
+    Parameters
+    -------
+    nodes: ndarray
+        Array with models nodes
+    elements: ndarray
+        Array with elements information.
+    Return
+    -------
+    """
+    areas = mats[:, 1].copy()
+    lengths = np.zeros_like(areas)
     ini = elements[:, 3]
     end = elements[:, 4]
     lengths = np.linalg.norm(nodes[end, 1:3] - nodes[ini, 1:3], axis=1)
+
     return np.sum(areas * lengths)
 
 
-def compliance(areas, nodes, elements, loads, mats):
-    """Compute the compliance of the truss"""
-    mats2 = mats.copy()
-    mats2[:, 1] = areas
-    disp = fem_sol(nodes, elements, mats2, loads)
-    forces = np.zeros_like(disp)
-    forces[loads[:, 0].astype(int), 0] = loads[:, 1]
-    forces[loads[:, 0].astype(int), 1] = loads[:, 2]
-    return np.sum(forces*disp)
 
-
-def stress_cons(areas, nodes, elements, mats, loads, stresses, comp):
-    """Return the stress constraints"""
-    mats2 = mats.copy()
-    mats2[:, 1] = areas
-    disp = fem_sol(nodes, elements, mats2, loads)
-    cons = np.asarray(stresses) -\
-        pos.stress_truss(nodes, elements, mats2, disp)
-    return cons[comp]
-
-
-def stress_bnd(areas, nodes, elements, mats, loads, stresses):
-    """Bounds on the stress for each member"""
-    mats2 = mats.copy()
-    mats2[:, 1] = areas
-    disp = fem_sol(nodes, elements, mats2, loads)
-    return np.asarray(stresses) -\
-        pos.stress_truss(nodes, elements, mats2, disp)
-
+def volume_del(nodes, elements):
+    """
+    Compute the volume of the truss
+    Parameters
+    -------
+    nodes: ndarray
+        Array with models nodes
+    elements: ndarray
+        Array with elements information.
+    Return
+    -------
+    """
+    ini = elements[:, 3]
+    end = elements[:, 4]
+    lengths = np.linalg.norm(nodes[end, 1:3] - nodes[ini, 1:3], axis=1)
+    return np.sum(lengths)
 
 def grid_truss(length, height, nx, ny):
     """
@@ -200,31 +200,12 @@ def protect_els(els, loads, BC, mask_del):
 
     return mask_els
 
-def del_node(nodes, els):
+def plot_truss_del(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
     """
-    Retricts nodes dof that aren't been used.
-    
-    Get from: https://github.com/AppliedMechanics-EAFIT/SolidsPy/blob/master/solidspy/solids_GUI.py
-    
-    Parameters
-    ----------
-    nodes : ndarray
+    nodes: ndarray
         Array with models nodes
-    els : ndarray
-        Array with models elements
-
-    Returns
-    -------
-    """   
-    n_nodes = nodes.shape[0]
-    for n in range(n_nodes):
-        if n not in els[:, -4:]:
-            nodes[n, -2:] = -1
-
-
-def plot_truss1(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
-    """
-    Plot a truss and encodes the stresses in a colormap
+    nodes: ndarray
+        Array with models nodes
     """
     mask = (mats[:,1]==1e-8)
     if mask.sum() > 0:
@@ -248,3 +229,24 @@ def plot_truss1(nodes, elements, mats, stresses, mask_del=None, tol=1e-5):
                     [nodes[ini, 2], nodes[end, 2]],
                     color=(1.0, 0.0, 0.0, 1.0), lw=widths[el[2]])
     plt.axis("image")
+
+def del_node(nodes, els):
+    """
+    Retricts nodes dof that aren't been used.
+    
+    Get from: https://github.com/AppliedMechanics-EAFIT/SolidsPy/blob/master/solidspy/solids_GUI.py
+    
+    Parameters
+    ----------
+    nodes : ndarray
+        Array with models nodes
+    els : ndarray
+        Array with models elements
+
+    Returns
+    -------
+    """   
+    n_nodes = nodes.shape[0]
+    for n in range(n_nodes):
+        if n not in els[:, -4:]:
+            nodes[n, -2:] = -1

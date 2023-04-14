@@ -30,24 +30,33 @@ mats1 = mats.copy()
 niter = 50
 RR = 0.01
 ER = 0.001
-V_opt = int(nels * 0.50)
+V_init = volume(nodes, elements, mats)
+V_opt = V_init * 0.40
 ELS = None
 
 mats2 = mats.copy()
 for i in range(niter):
-    if not is_equilibrium(nodes, elements, mats, loads) or (mats2[:,1]>1e-8).sum() < V_opt: 
-        print('Not equilibrium')
+    v = volume(nodes, elements, mats)
+    if not is_equilibrium(nodes, elements, mats, loads) or V_opt > v: 
+        print('Volume reach.')
         break
     mats2 = mats.copy()
     disp, stress = fem_sol(nodes, elements, mats, loads)
-    RR_el = np.abs(stress)/np.abs(stress.max())
+    max_stress = max(-stress.min(), stress.max())
+    RR_el = np.abs(stress)/max_stress
     mask_del = RR_el < RR
 
     mask_els = protect_els(elements, loads, BC, mask_del)
     mask_del *= mask_els
     mats[mask_del, 1] = 1e-8
+
     RR += ER
 print(RR)
+#%% Plotting
+print(V_init)
+print(V_opt)
+print(v)
+print(len(mats2[(mats2[:,1] < 1e-7), :]))
 #%% Plotting
 _, stresses1 = fem_sol(nodes, elements, mats1, loads)
 _, stresses2 = fem_sol(nodes, elements, mats2, loads)
