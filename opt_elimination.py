@@ -22,7 +22,6 @@ nodes[maskBC_1, 4] = -1
 nodes[maskBC_2, 3] = -1
 nodes[maskBC_2, 4] = -1
 BC = nodes[(nodes[:,-2] == -1) | (nodes[:,-1] == -1), 0]
-print(loads)
 
 #areas = np.random.uniform(low=0.1, high=1.0, size=nels)
 mats = np.ones((nels, 2))
