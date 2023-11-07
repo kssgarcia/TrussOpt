@@ -6,6 +6,7 @@ length = 6
 height = 3
 nx = 11
 ny = 9
+
 nodes, elements, nels, x, y = grid_truss(length, height, nx, ny)
 
 mask_loads = (x==length/2) & (y==0)
@@ -35,7 +36,7 @@ V_opt = V_init * 0.70
 ELS = None
 
 mats2 = mats.copy()
-for i in range(niter):
+for i in range(1):
     v = volume(nodes, elements, mats)
     if not is_equilibrium(nodes, elements, mats, loads) or V_opt > v: 
         print('Volume reach.')
